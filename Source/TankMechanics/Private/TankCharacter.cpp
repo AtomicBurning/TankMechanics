@@ -1,9 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "TankCharacter.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+
+#include "TankIdle.h"
+#include "TankDrive.h"
+#include "TankNeutralState.h"
+
+#include "TankCharacter.h"
 
 // Sets default values
 ATankCharacter::ATankCharacter()
@@ -11,18 +16,27 @@ ATankCharacter::ATankCharacter()
     // Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
     PrimaryActorTick.bCanEverTick = true;
     GetCharacterMovement();
+
+    IdleState = CreateDefaultSubobject<UTankIdle>(TEXT("IdleState"));
+    DriveState = CreateDefaultSubobject<UTankDrive>(TEXT("DriveState"));
+    NeutralSteerState = CreateDefaultSubobject<UTankNeutralState>(TEXT("NeutralSteerState"));
 }
 
 // Called every frame
 void ATankCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
-    UpdateCharacter();
+    CurrentState->UpdateState(DeltaTime);
+    CurrentState->HandleState();
 }
 
 void ATankCharacter::BeginPlay()
 {
     Super::BeginPlay();
+    IdleState->SetTank(this);
+    DriveState->SetTank(this);
+    NeutralSteerState->SetTank(this);
+    SetState(IdleState);
 }
 
 void ATankCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -36,7 +50,7 @@ void ATankCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
         if (IA_TankMove)
         {
             Input->BindAction(IA_TankMove, ETriggerEvent::Triggered, this, &ATankCharacter::MoveForward);
-            Input->BindAction(IA_TankMove, ETriggerEvent::Completed, this, &ATankCharacter::ResetAcceleration);
+            Input->BindAction(IA_TankMove, ETriggerEvent::Completed, this, &ATankCharacter::TankStop);
         }
         else
         {
@@ -47,6 +61,7 @@ void ATankCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
         if (IA_TankTurn)
         {
             Input->BindAction(IA_TankTurn, ETriggerEvent::Triggered, this, &ATankCharacter::TankTurn);
+            Input->BindAction(IA_TankTurn, ETriggerEvent::Completed, this, &ATankCharacter::TurnStop);
         }
         else
         {
@@ -98,49 +113,26 @@ void ATankCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 void ATankCharacter::MoveForward(const FInputActionValue& Value)
 {
-    // Apply the input to the character motion
-
-    float BaseSpeed = Value.Get<float>();
-
-    if (BaseSpeed > 0)
-    {
-        if (CurrentForwardSpeed < MaxForwardSpeed)
-        {
-            CurrentForwardSpeed += FMath::Abs(BaseSpeed) * ForwardAcceleration * GetWorld()->GetDeltaSeconds();
-        }
-    }
-    else
-    {
-        if (CurrentForwardSpeed < MaxForwardSpeed / 5)
-        {
-            CurrentForwardSpeed += FMath::Abs(BaseSpeed) * ForwardAcceleration / 5 * GetWorld()->GetDeltaSeconds();
-        }
-    }
-
-    GetCharacterMovement()->MaxWalkSpeed = CurrentForwardSpeed;
-    AddMovementInput(GetActorForwardVector(), BaseSpeed);
-    UE_LOG(LogTemp, Warning, TEXT("Moving with value: %f"), CurrentForwardSpeed);
+    if (CurrentState)
+        CurrentState->MoveForward(Value.Get<float>());
 }
 
-void ATankCharacter::ResetAcceleration()
+void ATankCharacter::TankStop()
 {
-    CurrentForwardSpeed = 0;
+    if (CurrentState)
+        CurrentState->TankStop();
 }
 
 void ATankCharacter::TankTurn(const FInputActionValue& Value)
 {
-    float TurnValue = Value.Get<float>();
-    if (TurnValue != 0.0f)
-    {
-        // Get the controller's rotation
-        FRotator NewRotation = GetControlRotation();
-        NewRotation.Yaw += TurnValue * TankRotateSpeed * GetWorld()->GetDeltaSeconds();
+    if (CurrentState)
+        CurrentState->TankTurn(Value.Get<float>());
+}
 
-        // Set the new rotation
-        GetController()->SetControlRotation(NewRotation);
-
-        //UE_LOG(LogTemp, Warning, TEXT("Turning with value: %f"), TurnValue);
-    }
+void ATankCharacter::TurnStop()
+{
+    if (CurrentState)
+        CurrentState->TurnStop();
 }
 
 void ATankCharacter::TurretRotate(const FInputActionValue& Value)
@@ -153,8 +145,14 @@ void ATankCharacter::TurretFire()
 
 }
 
-void ATankCharacter::UpdateCharacter()
+//State Machine Stuff
+void ATankCharacter::SetState(UTankState* NewState)
 {
-    const FVector PlayerVelocity = GetVelocity();
-    float TravelDirection = PlayerVelocity.X;
+    CurrentState = NewState;
+    CurrentState->EnterState();
+}
+
+UTankState* ATankCharacter::GetCurrentState() const
+{
+    return CurrentState;
 }

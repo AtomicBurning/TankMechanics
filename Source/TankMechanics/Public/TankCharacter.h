@@ -6,12 +6,17 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
+
 #include "TankCharacter.generated.h"
 
 
 class UTextRenderComponent;
 class UInputMappingContext;
 class UInputAction;
+
+class UTankIdle;
+class UTankDrive;
+class UTankNeutralState;
 
 UCLASS()
 class TANKMECHANICS_API ATankCharacter : public ACharacter
@@ -51,11 +56,27 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	void UpdateCharacter();
 	void MoveForward(const FInputActionValue& Value);
-	void ResetAcceleration();
+	void TankStop();
 	void TankTurn(const FInputActionValue& Value);
+	void TurnStop();
 	void TurretRotate(const FInputActionValue& Value);
 	void TurretFire();
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
+
+	//State Machine Stuff
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = States)
+	class UTankState* IdleState;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = States)
+	class UTankState* DriveState;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = States)
+	class UTankState* NeutralSteerState;
+
+	void SetState(UTankState* NewState);
+	UTankState* GetCurrentState() const;
+
+private:
+	class UTankState* CurrentState;
+
 };
