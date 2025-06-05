@@ -37,11 +37,12 @@ void UTankDrive::TankStop()
 
 void UTankDrive::TankTurn(float Value)
 {
-    float TurnValue = Value;
+    float TurnValue = Value * FMath::Clamp(Tank->CurrentForwardSpeed / 200, 1, 5);
 
     IsTurning = true;
     // Get the controller's rotation
     FRotator NewRotation = Tank->GetControlRotation();
+
     NewRotation.Yaw += TurnValue * Tank->TankRotateSpeed * GetWorld()->GetDeltaSeconds();
 
     // Set the new rotation
