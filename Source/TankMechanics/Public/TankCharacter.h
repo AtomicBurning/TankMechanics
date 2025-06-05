@@ -8,6 +8,7 @@
 #include "EnhancedInputComponent.h"
 
 #include "TankAnimInstance.h"
+#include "SoundManagerComponent.h"
 
 #include "TankCharacter.generated.h"
 
@@ -15,6 +16,8 @@
 class UTextRenderComponent;
 class UInputMappingContext;
 class UInputAction;
+
+class USoundManagerComponent;
 
 class UTankIdle;
 class UTankDrive;
@@ -54,6 +57,8 @@ public:
 	float TurretRotateSpeed;
 	float TurretYaw = 0;
 
+	bool CanFire = true;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -81,4 +86,16 @@ public:
 private:
 	class UTankState* CurrentState;
 
+//SFXs
+public:
+	UPROPERTY()
+	USoundManagerComponent* SoundManager;
+
+	UPROPERTY(EditDefaultsOnly, Category = "SFX")
+	USoundBase* FireSFX;
+	float FireTime;
+
+	UPROPERTY(EditDefaultsOnly, Category = "SFX")
+	USoundBase* ReloadSFX;
+	float ReloadTime;
 };

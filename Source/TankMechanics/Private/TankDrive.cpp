@@ -37,7 +37,12 @@ void UTankDrive::TankStop()
 
 void UTankDrive::TankTurn(float Value)
 {
-    float TurnValue = Value * FMath::Clamp(Tank->CurrentForwardSpeed / 200, 1, 5);
+    float TurnValue;
+
+    if (Tank->CurrentForwardSpeed != 0)
+        TurnValue = Value * (Tank->CurrentForwardSpeed / Tank->MaxForwardSpeed);
+    else
+        TurnValue = Value * 0.2f;
 
     IsTurning = true;
     // Get the controller's rotation

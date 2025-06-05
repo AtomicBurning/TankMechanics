@@ -20,6 +20,8 @@ ATankCharacter::ATankCharacter()
     TankIdleState = CreateDefaultSubobject<UTankIdle>(TEXT("TankIdleState"));
     TankDriveState = CreateDefaultSubobject<UTankDrive>(TEXT("TankDriveState"));
     TankNeutralSteerState = CreateDefaultSubobject<UTankNeutralState>(TEXT("TankNeutralSteerState"));
+
+    SoundManager = CreateDefaultSubobject<USoundManagerComponent>(TEXT("SoundManager"));
 }
 
 // Called every frame
@@ -147,15 +149,10 @@ void ATankCharacter::TurretRotate(const FInputActionValue& Value)
             UTankAnimInstance* TankAnimBP = Cast<UTankAnimInstance>(AnimInstance);
             if (TankAnimBP)
             {
-                TankAnimBP->TurretRotator = FRotator(0, 0, TurretYaw);
+                TankAnimBP->TurretRotator = FRotator(0, TurretYaw, 0);
             }
         }
     }
-}
-
-void ATankCharacter::TurretFire()
-{
-
 }
 
 //State Machine Stuff

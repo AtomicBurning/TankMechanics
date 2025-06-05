@@ -24,7 +24,7 @@ void UTankNeutralState::TankStop()
 
 void UTankNeutralState::TankTurn(float Value)
 {
-    float TurnValue = Value;
+    float TurnValue = Value * 0.2f;
 
     IsTurning = true;
     // Get the controller's rotation
