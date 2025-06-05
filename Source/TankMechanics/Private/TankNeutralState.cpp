@@ -43,8 +43,8 @@ void UTankNeutralState::TurnStop()
 void UTankNeutralState::HandleState()
 {
     if (IsMoving)
-        Tank->SetState(Tank->DriveState);
+        Tank->SetState(Tank->TankDriveState);
     if (!IsTurning && !IsMoving)
-        Tank->SetState(Tank->IdleState);
+        Tank->SetState(Tank->TankIdleState);
 }
 

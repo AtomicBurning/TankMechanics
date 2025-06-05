@@ -59,8 +59,8 @@ void UTankDrive::HandleState()
     if (!IsMoving)
     {
         if (!IsTurning)
-            Tank->SetState(Tank->IdleState);
+            Tank->SetState(Tank->TankIdleState);
         else
-            Tank->SetState(Tank->NeutralSteerState);
+            Tank->SetState(Tank->TankNeutralSteerState);
     }
 }

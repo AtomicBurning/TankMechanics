@@ -33,8 +33,8 @@ void UTankIdle::TankTurn(float Value)
 void UTankIdle::HandleState()
 {
     if (IsTurning && !IsMoving)
-        Tank->SetState(Tank->NeutralSteerState);
+        Tank->SetState(Tank->TankNeutralSteerState);
 
     if (IsMoving)
-        Tank->SetState(Tank->DriveState);
+        Tank->SetState(Tank->TankDriveState);
 }

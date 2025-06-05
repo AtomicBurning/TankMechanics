@@ -17,9 +17,9 @@ ATankCharacter::ATankCharacter()
     PrimaryActorTick.bCanEverTick = true;
     GetCharacterMovement();
 
-    IdleState = CreateDefaultSubobject<UTankIdle>(TEXT("IdleState"));
-    DriveState = CreateDefaultSubobject<UTankDrive>(TEXT("DriveState"));
-    NeutralSteerState = CreateDefaultSubobject<UTankNeutralState>(TEXT("NeutralSteerState"));
+    TankIdleState = CreateDefaultSubobject<UTankIdle>(TEXT("TankIdleState"));
+    TankDriveState = CreateDefaultSubobject<UTankDrive>(TEXT("TankDriveState"));
+    TankNeutralSteerState = CreateDefaultSubobject<UTankNeutralState>(TEXT("TankNeutralSteerState"));
 }
 
 // Called every frame
@@ -33,10 +33,10 @@ void ATankCharacter::Tick(float DeltaTime)
 void ATankCharacter::BeginPlay()
 {
     Super::BeginPlay();
-    IdleState->SetTank(this);
-    DriveState->SetTank(this);
-    NeutralSteerState->SetTank(this);
-    SetState(IdleState);
+    TankIdleState->SetTank(this);
+    TankDriveState->SetTank(this);
+    TankNeutralSteerState->SetTank(this);
+    SetState(TankIdleState);
 }
 
 void ATankCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -137,7 +137,20 @@ void ATankCharacter::TurnStop()
 
 void ATankCharacter::TurretRotate(const FInputActionValue& Value)
 {
+    TurretYaw += (Value.Get<float>() * TurretRotateSpeed) * GetWorld()->GetDeltaSeconds();
 
+    if (USkeletalMeshComponent* MeshComp = GetMesh())
+    {
+        if (UAnimInstance* AnimInstance = MeshComp->GetAnimInstance())
+        {
+            // Cast to your custom animation Blueprint class
+            UTankAnimInstance* TankAnimBP = Cast<UTankAnimInstance>(AnimInstance);
+            if (TankAnimBP)
+            {
+                TankAnimBP->TurretRotator = FRotator(0, 0, TurretYaw);
+            }
+        }
+    }
 }
 
 void ATankCharacter::TurretFire()

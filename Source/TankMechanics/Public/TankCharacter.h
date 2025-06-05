@@ -7,6 +7,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
 
+#include "TankAnimInstance.h"
+
 #include "TankCharacter.generated.h"
 
 
@@ -50,7 +52,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float TurretRotateSpeed;
-	float CurrentTurretAngle = 0;
+	float TurretYaw = 0;
 
 protected:
 	// Called when the game starts or when spawned
@@ -66,12 +68,12 @@ protected:
 
 	//State Machine Stuff
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = States)
-	class UTankState* IdleState;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = States)
-	class UTankState* DriveState;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = States)
-	class UTankState* NeutralSteerState;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = States)
+	class UTankState* TankIdleState;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = States)
+	class UTankState* TankDriveState;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = States)
+	class UTankState* TankNeutralSteerState;
 
 	void SetState(UTankState* NewState);
 	UTankState* GetCurrentState() const;
